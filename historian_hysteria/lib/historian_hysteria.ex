@@ -1,4 +1,13 @@
 defmodule HistorianHysteria do
+  def get_similarity_score do
+    {left_numbers, right_numbers} = read_from_file("numbers")
+    left_to_right = get_appearence_count(left_numbers, right_numbers)
+
+    Enum.zip(left_to_right, left_numbers)
+    |> Enum.map(fn {l, r} -> l * r end)
+    |> Enum.sum()
+  end
+
   def get_total_distance do
     {left_numbers, right_numbers} = read_from_file("numbers")
     ordered_left = sort(left_numbers)
@@ -30,13 +39,23 @@ defmodule HistorianHysteria do
 
   defp read_from_file(filename) do
     file_path = Path.join(__DIR__, filename)
+
     File.stream!(file_path)
     |> Stream.map(&String.trim/1)
-    |> Stream.reject(&(&1==""))
-    |>Stream.map(fn line ->
+    |> Stream.reject(&(&1 == ""))
+    |> Stream.map(fn line ->
       [left_col, right_col] = String.split(line)
       {String.to_integer(left_col), String.to_integer(right_col)}
     end)
     |> Enum.unzip()
+  end
+
+  defp get_appearence_count(first, second) do
+    first
+    |> Enum.map(fn f ->
+      Enum.count(second, fn s ->
+        f == s
+      end)
+    end)
   end
 end
